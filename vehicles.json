@@ -1,0 +1,14 @@
+[
+  {
+    "id": "V01",
+    "type": "electric",
+    "location": "A",
+    "battery": 87
+  },
+  {
+    "id": "V02",
+    "type": "diesel",
+    "location": "C",
+    "fuel": 72
+  }
+]
