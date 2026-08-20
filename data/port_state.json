@@ -1,0 +1,42 @@
+{
+  "time": "14:00",
+  "deadline": "18:00",
+  "weather": "heavy_rain",
+  "grid_load_kw": 2400,
+  "grid_capacity_kw": 3000,
+  "trucks": {
+    "T01": {"status": "idle",       "battery_pct": 82, "type": "ePM",    "location": "yard_b"},
+    "T02": {"status": "charging",   "battery_pct": 34, "type": "ePM",    "location": "bcss_1"},
+    "T03": {"status": "idle",       "battery_pct": 91, "type": "ePM",    "location": "gate_a"},
+    "T04": {"status": "idle",       "battery_pct": 67, "type": "ePM",    "location": "yard_c"},
+    "T05": {"status": "charging",   "battery_pct": 21, "type": "ePM",    "location": "bcss_2"},
+    "T06": {"status": "idle",       "battery_pct": 78, "type": "ePM",    "location": "yard_b"},
+    "T07": {"status": "dispatched", "battery_pct": 55, "type": "ePM",    "location": "berth_2"},
+    "T08": {"status": "idle",       "battery_pct": 44, "type": "diesel", "location": "gate_b"},
+    "T09": {"status": "idle",       "battery_pct": 0,  "type": "diesel", "location": "yard_a"},
+    "T10": {"status": "charging",   "battery_pct": 61, "type": "ePM",    "location": "bcss_3"}
+  },
+  "cranes": {
+    "C1": "operational",
+    "C2": "maintenance",
+    "C3": "maintenance",
+    "C4": "operational"
+  },
+  "charging_stations": {
+    "bcss_1": "occupied",
+    "bcss_2": "occupied",
+    "bcss_3": "occupied"
+  },
+  "container_moves": [
+    {"id": "M01", "origin": "berth_1", "dest": "yard_a",  "priority": "high",   "teu": 20, "reefer": false},
+    {"id": "M02", "origin": "yard_b",  "dest": "gate_a",  "priority": "high",   "teu": 40, "reefer": false},
+    {"id": "M03", "origin": "berth_2", "dest": "yard_c",  "priority": "medium", "teu": 20, "reefer": true},
+    {"id": "M04", "origin": "yard_a",  "dest": "gate_b",  "priority": "low",    "teu": 20, "reefer": false},
+    {"id": "M05", "origin": "berth_1", "dest": "yard_b",  "priority": "high",   "teu": 40, "reefer": false},
+    {"id": "M06", "origin": "yard_c",  "dest": "gate_a",  "priority": "medium", "teu": 20, "reefer": false},
+    {"id": "M07", "origin": "berth_2", "dest": "yard_a",  "priority": "low",    "teu": 20, "reefer": false},
+    {"id": "M08", "origin": "yard_b",  "dest": "gate_b",  "priority": "high",   "teu": 40, "reefer": false},
+    {"id": "M09", "origin": "berth_1", "dest": "yard_c",  "priority": "medium", "teu": 20, "reefer": false},
+    {"id": "M10", "origin": "yard_a",  "dest": "gate_a",  "priority": "low",    "teu": 20, "reefer": true}
+  ]
+}
