@@ -1,3 +1,5 @@
+**To do: edit project to use google ai studio (free) instead of anthropic api (not free) but run into some issues!!! Bug appears after using google api**
+
 # 🏗️ Green Port Control Tower
 
 A multi-agent AI system that coordinates sustainability decisions across a simulated PSA port — balancing transport, energy, and climate trade-offs in real time.
