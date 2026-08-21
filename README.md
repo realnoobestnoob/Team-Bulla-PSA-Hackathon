@@ -5,6 +5,7 @@
 - Improve overall model complexity
 - Improve UI of output in terminal
 - Optimize token usage
+- Generate means to evaluate model performance (KPI/metrics/some sort of score). Can use jupyter notebook to make some charts for the presentation
 
 # Notes
 - Using gemini 3.6 flash via google ai studio
