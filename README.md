@@ -3,7 +3,7 @@
 
 # To-do!!!
 - Improve overall model complexity
-- Improve UI of output in terminal
+- Improve UI of output in terminal/deploy on streamlit
 - Optimize token usage
 - Generate means to evaluate model performance (KPI/metrics/some sort of score). Can use jupyter notebook to make some charts for the presentation
 
