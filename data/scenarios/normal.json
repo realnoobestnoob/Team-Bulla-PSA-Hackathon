@@ -1,0 +1,12 @@
+{
+  "name": "Normal Operations",
+  "description": "Clear weather, all equipment functional",
+  "overrides": {
+    "weather": {
+      "condition": "clear",
+      "rain_probability": 0.05,
+      "wind_speed": 10,
+      "visibility": "good"
+    }
+  }
+}

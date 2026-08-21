@@ -1,0 +1,7 @@
+{
+  "condition": "heavy_rain",
+  "rain_probability": 0.75,
+  "wind_speed": 32,
+  "temperature": 34,
+  "visibility": "reduced"
+}

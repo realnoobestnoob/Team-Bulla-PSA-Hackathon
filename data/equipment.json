@@ -1,0 +1,50 @@
+{
+  "cranes": [
+    {
+      "id": "CR01",
+      "location": "A",
+      "status": "operational",
+      "type": "electric"
+    },
+    {
+      "id": "CR02",
+      "location": "B",
+      "status": "maintenance",
+      "type": "electric"
+    },
+    {
+      "id": "CR03",
+      "location": "C",
+      "status": "operational",
+      "type": "diesel"
+    },
+    {
+      "id": "CR04",
+      "location": "D",
+      "status": "operational",
+      "type": "electric"
+    }
+  ],
+  "forklifts": [
+    {
+      "id": "FL01",
+      "location": "A",
+      "status": "operational"
+    },
+    {
+      "id": "FL02",
+      "location": "B",
+      "status": "operational"
+    },
+    {
+      "id": "FL03",
+      "location": "C",
+      "status": "breakdown"
+    },
+    {
+      "id": "FL04",
+      "location": "D",
+      "status": "operational"
+    }
+  ]
+}

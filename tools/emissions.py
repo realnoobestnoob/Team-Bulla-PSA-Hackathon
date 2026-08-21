@@ -1,12 +1,12 @@
 DIESEL_CO2_KG_PER_KM = 0.8
 
 
-def emissions_calculator(truck_id: str, distance_km: float, port_data: dict) -> dict:
-    truck = port_data["trucks"].get(truck_id)
-    if not truck:
-        return {"error": "Truck not found"}
+def estimate_emissions(vehicle_id: str, distance_km: float, port_state: dict) -> dict:
+    v = port_state["vehicles"].get(vehicle_id)
+    if not v:
+        return {"error": f"Vehicle {vehicle_id} not found"}
 
-    if truck["type"] == "ePM":
+    if v["type"] == "electric":
         emitted = 0.0
         saved = round(distance_km * DIESEL_CO2_KG_PER_KM, 2)
     else:
@@ -14,7 +14,8 @@ def emissions_calculator(truck_id: str, distance_km: float, port_data: dict) -> 
         saved = 0.0
 
     return {
-        "truck_id": truck_id, "type": truck["type"],
+        "vehicle_id": vehicle_id, "type": v["type"],
         "distance_km": distance_km,
-        "co2_emitted_kg": emitted, "co2_saved_kg": saved,
+        "co2_emitted_kg": emitted,
+        "co2_saved_vs_diesel_kg": saved,
     }

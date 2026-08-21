@@ -1,0 +1,19 @@
+{
+  "primary": "minimise_emissions",
+  "secondary": [
+    "meet_deadlines",
+    "minimise_energy_peak"
+  ],
+  "constraints": {
+    "prefer_electric": true,
+    "min_battery_reserve_pct": 20,
+    "min_fuel_reserve_pct": 15,
+    "grid_limit_kw": 3000,
+    "max_acceptable_delay_mins": 30
+  },
+  "weights": {
+    "emissions": 0.5,
+    "delay": 0.3,
+    "energy": 0.2
+  }
+}

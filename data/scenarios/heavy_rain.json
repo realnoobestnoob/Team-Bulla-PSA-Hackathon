@@ -1,0 +1,20 @@
+{
+  "name": "Heavy Rain + Equipment Shortage",
+  "description": "High rainfall, reduced visibility, forklift breakdown at C",
+  "overrides": {
+    "weather": {
+      "condition": "heavy_rain",
+      "rain_probability": 0.9,
+      "wind_speed": 45,
+      "visibility": "poor"
+    },
+    "vehicles": {
+      "V07": {
+        "status": "breakdown"
+      },
+      "V10": {
+        "status": "breakdown"
+      }
+    }
+  }
+}

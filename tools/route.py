@@ -1,52 +1,72 @@
 DISTANCES = {
-    ("berth_1", "yard_a"): 1.2, ("berth_1", "yard_b"): 0.8, ("berth_1", "yard_c"): 1.5,
-    ("berth_2", "yard_a"): 0.9, ("berth_2", "yard_b"): 1.1, ("berth_2", "yard_c"): 0.7,
-    ("yard_a",  "gate_a"): 0.6, ("yard_a",  "gate_b"): 0.9,
-    ("yard_b",  "gate_a"): 0.4, ("yard_b",  "gate_b"): 0.7,
-    ("yard_c",  "gate_a"): 1.0, ("yard_c",  "gate_b"): 0.5,
+    ("A","B"):2.0,("A","C"):3.5,("A","D"):5.0,
+    ("B","C"):2.5,("B","D"):3.5,("C","D"):2.0,
 }
 
 
-def _dist(a: str, b: str) -> float:
-    a, b = a.lower(), b.lower()
-    return DISTANCES.get((a, b)) or DISTANCES.get((b, a)) or 1.0
+def _dist(o: str, d: str) -> float:
+    return DISTANCES.get((o,d)) or DISTANCES.get((d,o)) or 2.0
 
 
-def route_calculator(move_id: str, truck_id: str, port_data: dict) -> dict:
-    move = next((m for m in port_data["container_moves"] if m["id"] == move_id), None)
-    truck = port_data["trucks"].get(truck_id)
-    if not move or not truck:
-        return {"error": "Move or truck not found"}
+def get_vehicle_options(job_id: str, port_state: dict) -> dict:
+    job = port_state["jobs"].get(job_id)
+    if not job:
+        return {"error": f"Job {job_id} not found"}
 
-    dist = _dist(move["origin"], move["dest"])
-    empty_leg = truck["location"].lower() not in [move["origin"].lower(), move["dest"].lower()]
-    total_km = round(dist + (0.4 if empty_leg else 0), 2)
-    speed_kmh = 15 if port_data.get("weather") == "heavy_rain" else 20
-    time_mins = round((total_km / speed_kmh) * 60)
-    battery_used = round(total_km * 2.5, 1)
-    feasible = truck.get("battery_pct", 0) >= battery_used + 15
-
-    return {
-        "move_id": move_id, "truck_id": truck_id,
-        "distance_km": total_km, "time_mins": time_mins,
-        "empty_leg": empty_leg, "battery_pct_used": battery_used, "feasible": feasible,
-    }
-
-
-def assign_truck(move_id: str, prefer_electric: bool, port_data: dict) -> dict:
-    move = next((m for m in port_data["container_moves"] if m["id"] == move_id), None)
-    if not move:
-        return {"error": "Move not found"}
-
+    obj = port_state["objectives"]["constraints"]
     candidates = []
-    for tid, t in port_data["trucks"].items():
-        if t["status"] != "idle":
+    for vid, v in port_state["vehicles"].items():
+        if v.get("status") != "idle":
             continue
-        score = (50 if prefer_electric and t["type"] == "ePM" else 0)
-        score += t.get("battery_pct", 0)
-        score -= _dist(t["location"], move["origin"]) * 10
-        candidates.append({"truck_id": tid, "score": round(score, 1),
-                            "battery_pct": t.get("battery_pct", 0), "type": t["type"]})
+        score = 0
+        if v["type"] == "electric" and obj.get("prefer_electric"):
+            score += 50
+            if v.get("battery",0) >= obj["min_battery_reserve_pct"] + 10:
+                score += v.get("battery", 0)
+            else:
+                continue  # battery too low
+        else:
+            if v.get("fuel", 0) < obj["min_fuel_reserve_pct"] + 10:
+                continue
+            score += v.get("fuel", 0) * 0.5
+
+        # Closer is better
+        dist_to_origin = _dist(v["location"], job["origin"])
+        score -= dist_to_origin * 5
+        candidates.append({
+            "vehicle_id": vid, "type": v["type"],
+            "battery_or_fuel": v.get("battery") or v.get("fuel"),
+            "location": v["location"], "score": round(score, 1)
+        })
 
     candidates.sort(key=lambda x: x["score"], reverse=True)
-    return {"move_id": move_id, "ranked_trucks": candidates[:3], "idle_count": len(candidates)}
+    return {"job_id": job_id, "ranked_vehicles": candidates[:4], "available_count": len(candidates)}
+
+
+def calculate_route(vehicle_id: str, job_id: str, port_state: dict) -> dict:
+    v = port_state["vehicles"].get(vehicle_id)
+    j = port_state["jobs"].get(job_id)
+    if not v or not j:
+        return {"error": "Vehicle or job not found"}
+
+    dist = _dist(j["origin"], j["destination"])
+    deadhead = _dist(v["location"], j["origin"]) if v["location"] != j["origin"] else 0
+    total = round(dist + deadhead, 2)
+
+    weather = port_state["weather"].get("condition","clear")
+    speed = 20 if weather in ("heavy_rain","storm") else 30
+    time_mins = round((total / speed) * 60)
+
+    battery_used = round(total * 2.5, 1) if v["type"] == "electric" else 0
+    feasible = (
+        v.get("battery", 100) >= battery_used + port_state["objectives"]["constraints"]["min_battery_reserve_pct"]
+        if v["type"] == "electric"
+        else v.get("fuel", 100) >= port_state["objectives"]["constraints"]["min_fuel_reserve_pct"] + 5
+    )
+
+    return {
+        "vehicle_id": vehicle_id, "job_id": job_id,
+        "job_distance_km": dist, "deadhead_km": round(deadhead, 2),
+        "total_km": total, "time_mins": time_mins,
+        "battery_pct_used": battery_used, "feasible": feasible,
+    }

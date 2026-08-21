@@ -1,0 +1,30 @@
+[
+  {
+    "id": "CS01",
+    "location": "A",
+    "status": "available",
+    "capacity_kw": 150,
+    "current_vehicle": null
+  },
+  {
+    "id": "CS02",
+    "location": "B",
+    "status": "occupied",
+    "capacity_kw": 150,
+    "current_vehicle": "V03"
+  },
+  {
+    "id": "CS03",
+    "location": "C",
+    "status": "available",
+    "capacity_kw": 50,
+    "current_vehicle": null
+  },
+  {
+    "id": "CS04",
+    "location": "D",
+    "status": "occupied",
+    "capacity_kw": 150,
+    "current_vehicle": "V05"
+  }
+]

@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """
 Green Port Control Tower — Demo Runner
-Run: python run_demo.py
+Usage: python run_demo.py [scenario]
+Scenarios: heavy_rain (default) | normal
 """
-import json
-import os
-import sys
+import sys, os, json
 from pathlib import Path
-
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
@@ -15,132 +13,96 @@ from rich.table import Table
 from rich import box
 
 load_dotenv()
-if not os.getenv("ANTHROPIC_API_KEY"):
-    print("ERROR: ANTHROPIC_API_KEY not set. Copy .env.example to .env and add your key.")
+if not os.getenv("GOOGLE_API_KEY"):
+    print("ERROR: GOOGLE_API_KEY not set. Copy .env.example to .env and add your key.")
     sys.exit(1)
 
+from loader import load_port_state
 from graph import app
-from state import PortState
+from state import WorkflowState
 
 console = Console()
+SCENARIO = sys.argv[1] if len(sys.argv) > 1 else "heavy_rain"
 
 
-def print_header():
+def print_header(scenario: str):
     console.print(Panel(
-        "[bold cyan]🏗  GREEN PORT CONTROL TOWER  🏗[/bold cyan]\n"
-        "[dim]PSA Code Sprint 2.0 — Agentic AI Sustainability Demo[/dim]",
+        "[bold cyan]🏗  GREEN PORT CONTROL TOWER[/bold cyan]\n"
+        f"[dim]PSA Code Sprint 2.0  |  Scenario: {scenario.replace('_',' ').title()}[/dim]",
         border_style="cyan", expand=False,
     ))
 
 
-def print_scenario(port_data: dict):
-    console.print("\n[bold]📋 SCENARIO[/bold]")
+def print_port_state(port_state: dict):
+    console.print("\n[bold]📋 PORT STATE[/bold]")
 
-    trucks = port_data["trucks"]
-    idle     = sum(1 for t in trucks.values() if t["status"] == "idle")
-    charging = sum(1 for t in trucks.values() if t["status"] == "charging")
-    epm      = sum(1 for t in trucks.values() if t["type"] == "ePM")
+    vehicles = port_state["vehicles"]
+    jobs     = port_state["jobs"]
+    weather  = port_state["weather"]
+    energy   = port_state["energy"]
 
-    moves   = port_data["container_moves"]
-    high    = sum(1 for m in moves if m["priority"] == "high")
-    reefers = sum(1 for m in moves if m["reefer"])
-
-    cranes_down = sum(1 for s in port_data["cranes"].values() if s == "maintenance")
-    grid_pct = round(port_data["grid_load_kw"] / port_data["grid_capacity_kw"] * 100)
+    idle     = sum(1 for v in vehicles.values() if v.get("status") == "idle")
+    electric = sum(1 for v in vehicles.values() if v.get("type") == "electric")
+    high_j   = sum(1 for j in jobs.values() if j.get("priority") == "high")
+    grid_pct = round(energy["grid_load_kw"] / energy["grid_capacity_kw"] * 100)
 
     tbl = Table(box=box.SIMPLE, show_header=False)
     tbl.add_column(style="dim", width=22)
     tbl.add_column()
-    tbl.add_row("Time window",  f"{port_data['time']} → {port_data['deadline']}")
-    tbl.add_row("Weather",      f"[red]{port_data['weather'].replace('_', ' ').title()}[/red]")
-    tbl.add_row("Grid load",    f"{port_data['grid_load_kw']}/{port_data['grid_capacity_kw']} kW  ({grid_pct}%)")
-    tbl.add_row("Trucks",       f"{len(trucks)} total  ({epm} ePM)  |  {idle} idle, {charging} charging")
-    tbl.add_row("Cranes down",  f"{cranes_down} of {len(port_data['cranes'])}")
-    tbl.add_row("Container moves", f"{len(moves)} total  |  {high} HIGH priority  |  {reefers} reefer")
+    tbl.add_row("Vehicles",    f"{len(vehicles)} total  ({electric} electric, {len(vehicles)-electric} diesel)  |  {idle} idle")
+    tbl.add_row("Jobs",        f"{len(jobs)} total  |  {high_j} HIGH priority")
+    tbl.add_row("Weather",     f"[red]{weather.get('condition','?').replace('_',' ').title()}[/red]  |  Wind: {weather.get('wind_speed','?')} km/h")
+    tbl.add_row("Grid load",   f"{energy['grid_load_kw']}/{energy['grid_capacity_kw']} kW  ({grid_pct}%)")
     console.print(tbl)
 
 
-def print_agent_header(step: int, name: str, emoji: str):
-    console.rule(f"[bold]{emoji}  [{step}/4] {name.upper()} AGENT[/bold]")
+def print_final_summary(final_state: dict):
+    console.rule("[bold green]✅ FINAL SUMMARY[/bold green]")
 
+    executed = final_state.get("executed_actions", [])
+    projected = final_state.get("projected_metrics", {})
+    baseline  = final_state.get("baseline_metrics", {})
 
-def print_action_plan(final_state: PortState):
-    console.rule("[bold green]✅  FINAL ACTION PLAN[/bold green]")
+    tbl = Table(box=box.ROUNDED)
+    tbl.add_column("Metric")
+    tbl.add_column("Baseline", justify="right")
+    tbl.add_column("Achieved", justify="right", style="green")
 
-    plan = final_state["action_plan"]
-    if not plan:
-        console.print("[red]No actions in plan.[/red]")
-        return
-
-    tbl = Table(box=box.ROUNDED, show_lines=True)
-    tbl.add_column("#",       style="dim", width=3)
-    tbl.add_column("Action",  style="yellow", width=18)
-    tbl.add_column("Details", width=30)
-    tbl.add_column("Reason",  width=40)
-    tbl.add_column("Auth",    width=10)
-
-    for i, a in enumerate(plan, 1):
-        auth  = "[green]auto[/green]" if a.get("tag") == "auto" else "[cyan]approved[/cyan]"
-        tbl.add_row(
-            str(i),
-            a.get("action", "?"),
-            str(a.get("details", "")),
-            a.get("reason", ""),
-            auth,
-        )
+    tbl.add_row("Jobs covered",    str(baseline.get("jobs_covered","?")), str(len(executed)))
+    tbl.add_row("CO₂ emitted kg",  str(baseline.get("co2_kg","?")),      str(projected.get("co2_kg","?")))
+    tbl.add_row("CO₂ saved kg",    "—",                                   f"[green]{projected.get('co2_saved_kg','?')}[/green]")
+    tbl.add_row("Grid headroom kW","—",                                   str(projected.get("headroom_kw","?")))
     console.print(tbl)
 
-    # Summary stats
-    climate = final_state.get("climate_recs", {})
-    co2 = climate.get("total_co2_saved_kg", 0)
-    energy = final_state.get("energy_recs", {})
-    headroom = energy.get("headroom_kw", "?")
-
-    console.print(f"\n[bold]📊 Impact Summary[/bold]")
-    console.print(f"  CO₂ saved vs diesel baseline : [green]{co2} kg[/green]")
-    console.print(f"  Grid headroom remaining      : [green]{headroom} kW[/green]")
-    console.print(f"  Actions auto-executed        : [green]{sum(1 for a in plan if a.get('tag') in ('auto', None))}[/green]")
-
-    audit = final_state.get("audit_log", [])
-    approved_step = next((s for s in audit if s.get("step") == "human_approval"), {})
-    console.print(f"  Actions approved by human    : [cyan]{len(approved_step.get('approved', []))}[/cyan]")
-    console.print(f"  Actions rejected by human    : [red]{len(approved_step.get('rejected', []))}[/red]")
+    console.print(f"\n[bold]Audit log:[/bold] {len(final_state.get('audit_log',[]))} entries recorded")
 
 
 def main():
-    print_header()
+    print_header(SCENARIO)
+    port_state = load_port_state(SCENARIO)
+    print_port_state(port_state)
 
-    port_data = json.loads(Path("data/port_state.json").read_text())
-    print_scenario(port_data)
-
-    initial: PortState = {
-        "port_data":     port_data,
-        "transport_recs": [],
-        "energy_recs":    {},
-        "climate_recs":   {},
-        "action_plan":    [],
-        "escalated":      [],
-        "audit_log":      [],
-    }
-
-    # Stream node-by-node so progress is visible
-    agent_meta = {
-        "transport": (1, "Transport", "🚛"),
-        "energy":    (2, "Energy",    "⚡"),
-        "climate":   (3, "Climate",   "🌿"),
-        "decision":  (4, "Decision",  "🧠"),
+    initial: WorkflowState = {
+        "port_state":        port_state,
+        "proposed_actions":  [],
+        "validated_actions": [],
+        "pending_approval":  [],
+        "executed_actions":  [],
+        "rejected_actions":  [],
+        "baseline_metrics":  {},
+        "projected_metrics": {},
+        "replan_count":      0,
+        "replan_reason":     "",
+        "human_decision":    "",
+        "audit_log":         [],
     }
 
     final_state = initial
-    for step_output in app.stream(initial):
-        for node_name, state in step_output.items():
-            if node_name in agent_meta:
-                n, label, emoji = agent_meta[node_name]
-                print_agent_header(n, label, emoji)
+    for chunk in app.stream(initial):
+        for _, state in chunk.items():
             final_state = state
 
-    print_action_plan(final_state)
-    console.print("\n[dim]Full audit log saved to: audit_log (in final state)[/dim]\n")
+    print_final_summary(final_state)
 
 
 if __name__ == "__main__":

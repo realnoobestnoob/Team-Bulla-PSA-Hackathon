@@ -1,29 +1,32 @@
-RISK_MAP = {
-    "clear": "low", "cloudy": "low",
-    "light_rain": "medium", "heavy_rain": "high", "storm": "critical",
-}
+RISK = {"clear":"low","cloudy":"low","light_rain":"medium","heavy_rain":"high","storm":"critical"}
 
 
-def weather_risk_assessor(move_id: str, port_data: dict) -> dict:
-    move = next((m for m in port_data["container_moves"] if m["id"] == move_id), None)
-    if not move:
-        return {"error": "Move not found"}
+def check_weather_risk(job_id: str, port_state: dict) -> dict:
+    job = port_state["jobs"].get(job_id)
+    if not job:
+        return {"error": f"Job {job_id} not found"}
 
-    weather = port_data.get("weather", "clear")
-    base_risk = RISK_MAP.get(weather, "low")
-    is_reefer = move.get("reefer", False)
-    priority = move.get("priority", "low")
+    weather = port_state["weather"]
+    cond = weather.get("condition","clear")
+    wind = weather.get("wind_speed", 0)
+    risk = RISK.get(cond, "low")
 
-    if is_reefer and base_risk == "high":
-        risk, reason, escalate = "high", "Reefer container in heavy rain — electrical connection risk", True
-    elif base_risk == "high" and priority == "low":
-        risk, reason, escalate = "medium", "Low-priority move in heavy rain — recommend delay", False
+    if wind > 40:
+        risk = "high"
+        reason = f"Wind speed {wind} km/h exceeds safe operating threshold"
+    elif risk == "high":
+        reason = f"Heavy rain — reduced visibility and slippery surfaces"
+    elif risk == "medium":
+        reason = f"Light rain — monitor conditions"
     else:
-        risk, reason, escalate = base_risk, f"{weather.replace('_', ' ').title()} conditions", False
+        reason = "Conditions acceptable"
+
+    escalate = risk in ("high","critical") and job.get("priority") != "high"
+    recommend_delay = risk in ("high","critical") and job.get("priority") == "low"
 
     return {
-        "move_id": move_id, "weather": weather,
-        "risk": risk, "reason": reason,
-        "recommend_delay": risk in ("high", "medium") and priority != "high",
-        "escalate": escalate,
+        "job_id": job_id, "condition": cond,
+        "wind_speed_kmh": wind, "risk": risk,
+        "reason": reason, "recommend_delay": recommend_delay,
+        "escalate_to_human": escalate,
     }

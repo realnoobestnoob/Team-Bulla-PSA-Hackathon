@@ -1,0 +1,12 @@
+{
+  "grid_load_kw": 2400,
+  "grid_capacity_kw": 3000,
+  "renewable_fraction": 0.42,
+  "charge_rate_kw": 150,
+  "vehicle_move_load_kw": 20,
+  "peak_hours": [
+    "08:00",
+    "12:00",
+    "18:00"
+  ]
+}

@@ -1,49 +1,82 @@
-import json
-import anthropic
+import json, os, re
+from google import genai
+from google.genai import types
 from rich.console import Console
 
 console = Console()
-client = anthropic.Anthropic()
-MODEL = "claude-sonnet-4-6"
+MODEL = "gemini-3.6-flash"
+_client = None
 
 
-def run_agent(name: str, system: str, user_msg: str, tools: list, handlers: dict) -> str:
-    """Run a Claude agent with tool calling until end_turn."""
-    messages = [{"role": "user", "content": user_msg}]
+def _get_client():
+    global _client
+    if _client is None:
+        _client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+    return _client
+
+
+def _build_tools(tool_defs: list) -> list:
+    """Convert tool_defs to google.genai FunctionDeclaration objects."""
+    declarations = []
+    for t in tool_defs:
+        schema = t["input_schema"]
+        props  = {
+            k: types.Schema(
+                type=v.get("type", "STRING").upper(),
+                description=v.get("description", ""),
+            )
+            for k, v in schema.get("properties", {}).items()
+        }
+        declarations.append(types.FunctionDeclaration(
+            name=t["name"],
+            description=t["description"],
+            parameters=types.Schema(
+                type="OBJECT",
+                properties=props,
+                required=schema.get("required", []),
+            ),
+        ))
+    return [types.Tool(function_declarations=declarations)]
+
+
+def run_agent(name: str, system: str, user_msg: str, tool_defs: list, handlers: dict) -> str:
+    """Run a Gemini agent with tool calling until no further function calls."""
+    chat = _get_client().chats.create(
+        model=MODEL,
+        config=types.GenerateContentConfig(
+            system_instruction=system,
+            tools=_build_tools(tool_defs),
+        ),
+    )
+    response = chat.send_message(user_msg)
 
     while True:
-        resp = client.messages.create(
-            model=MODEL, max_tokens=1500,
-            system=system, tools=tools, messages=messages,
-        )
-        messages.append({"role": "assistant", "content": resp.content})
+        parts    = response.candidates[0].content.parts
+        fn_calls = [p for p in parts if p.function_call]
 
-        if resp.stop_reason == "end_turn":
-            return next((b.text for b in resp.content if hasattr(b, "text")), "")
+        if not fn_calls:
+            return "".join(p.text for p in parts if hasattr(p, "text") and p.text)
 
-        tool_results = []
-        for block in resp.content:
-            if block.type == "tool_use":
-                console.print(f"    [dim]→ [{name}] {block.name}({block.input})[/dim]")
-                handler = handlers.get(block.name)
-                result = handler(**block.input) if handler else {"error": "Unknown tool"}
-                tool_results.append({
-                    "type": "tool_result",
-                    "tool_use_id": block.id,
-                    "content": json.dumps(result),
-                })
-
-        messages.append({"role": "user", "content": tool_results})
+        fn_responses = []
+        for p in fn_calls:
+            fc   = p.function_call
+            args = dict(fc.args)
+            console.print(f"    [dim]→ [{name}] {fc.name}({args})[/dim]")
+            handler = handlers.get(fc.name)
+            result  = handler(**args) if handler else {"error": "Unknown tool"}
+            fn_responses.append(
+                types.Part.from_function_response(
+                    name=fc.name,
+                    response={"result": json.dumps(result)},
+                )
+            )
+        response = chat.send_message(fn_responses)
 
 
 def extract_json(text: str):
-    """Safely parse JSON from Claude output, stripping markdown fences."""
-    import re
     text = re.sub(r"```(?:json)?\n?", "", text).strip().rstrip("`").strip()
     try:
         return json.loads(text)
-    except json.JSONDecodeError:
-        match = re.search(r"[\[{].*[\]}]", text, re.DOTALL)
-        if match:
-            return json.loads(match.group())
-        return []
+    except Exception:
+        m = re.search(r"[\[{].*[\]}]", text, re.DOTALL)
+        return json.loads(m.group()) if m else []
