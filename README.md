@@ -106,9 +106,8 @@ green_port_agent/
 
 ## Changing the scenario
 
-<<<<<<< HEAD
 Edit any file in `data/` to change the environment. Scenario overrides in `data/scenarios/heavy_rain.json` are applied on top of the base data at load time — the source files are never modified.
-=======
+
 | Field | What it controls |
 |-------|-----------------|
 | `weather` | `"clear"` / `"light_rain"` / `"heavy_rain"` / `"storm"` |
@@ -128,4 +127,3 @@ Edit any file in `data/` to change the environment. Scenario overrides in `data/
 | LangGraph | Stateful multi-agent orchestration with conditional routing |
 | Python | Tool functions, mock data, CLI output |
 | Rich | Formatted terminal output |
->>>>>>> 57a360f19d095da19fa834088ca6b411634c7132
