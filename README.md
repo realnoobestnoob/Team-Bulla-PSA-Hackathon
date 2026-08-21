@@ -1,7 +1,14 @@
-- Decision making use ai agents
-- 
+# Updates!
+- Generated barely working skeletal model
 
-**To do: edit project to use google ai studio (free) instead of anthropic api (not free) but run into some issues!!! Bug appears after using google api**
+# To-do!!!
+- Improve overall model complexity
+- Improve UI of output in terminal
+- Optimize token usage
+
+# Notes
+- Using gemini 3.6 flash via google ai studio
+- Use AI agents for decision making; the rest use conventional code
 
 # 🏗️ Green Port Control Tower
 **PSA Code Sprint 2.0** — Agentic AI for Port Sustainability
