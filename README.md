@@ -1,6 +1,7 @@
 # Updates!
 
 * Now using thinking high mode for models
+* (maybe we don't need high thinking mode? since this solution is only a prototype + the request limit kept exceeding)
 
 # To-do!!!
 
