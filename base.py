@@ -1,10 +1,11 @@
+# This file is still neccessary for decision.py 
 import json, os, re, time, threading
 from google import genai
 from google.genai import types
 from rich.console import Console
 
 console = Console()
-MODEL = "gemini-3.6-flash"
+MODEL = "gemini-3.7-flash"
 _client = None
 
 # ── Rate limiter (≤5 requests/minute) ────────────────────────────────────────
@@ -64,6 +65,9 @@ def run_agent(name: str, system: str, user_msg: str, tool_defs: list, handlers: 
         config=types.GenerateContentConfig(
             system_instruction=system,
             tools=_build_tools(tool_defs),
+            thinking_config=types.ThinkingConfig(
+                thinking_level="high"
+            ),
         ),
     )
     _throttle()

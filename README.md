@@ -1,6 +1,7 @@
 # Updates!
 - ~~Generated barely working skeletal model~~
 - Generated dashboard
+- Now using thinking high mode for models
 
 ![How it looks](https://i.ibb.co/pj3dqc7r/dashboard1.png)
 
@@ -11,7 +12,7 @@
   - Tutorial on how to use/ make UI more intuitive
   - Way to accept some jobs and reject some jobs and replan after that
 - Optimize token usage
-  - Dedicate larger portion of tokens to thinking
+  - ~~Dedicate larger portion of tokens to thinking~~
 - Generate means to evaluate model performance (KPI/metrics/some sort of score). 
 
 # Notes

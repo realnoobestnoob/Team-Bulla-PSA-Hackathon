@@ -92,6 +92,9 @@ def run_agent(
         config=types.GenerateContentConfig(
             system_instruction=system,
             tools=_build_tools(tool_defs),
+            thinking_config=types.ThinkingConfig(
+                thinking_level="high"
+            ),
         ),
     )
     response = chat.send_message(user_msg)
