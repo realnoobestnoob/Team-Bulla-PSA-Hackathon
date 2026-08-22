@@ -7,8 +7,11 @@
 # To-do!!!
 - Improve overall model complexity
 - ~~Improve UI of output in terminal/deploy on streamlit~~
-- Improve dashboard (edit model selection...)
+- Improve dashboard
+  - Tutorial on how to use/ make UI more intuitive
+  - Way to accept some jobs and reject some jobs and replan after that
 - Optimize token usage
+  - Dedicate larger portion of tokens to thinking
 - Generate means to evaluate model performance (KPI/metrics/some sort of score). 
 
 # Notes
