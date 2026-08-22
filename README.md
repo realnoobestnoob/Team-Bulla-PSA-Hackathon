@@ -2,7 +2,7 @@
 - ~~Generated barely working skeletal model~~
 - Generated dashboard
 
-![How it looks](https://ibb.co/qYRp6KSF)
+![How it looks](https://i.ibb.co/pj3dqc7r/dashboard1.png)
 
 # To-do!!!
 - Improve overall model complexity
