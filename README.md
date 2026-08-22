@@ -18,9 +18,6 @@
 * Use AI agents for decision making; the rest use conventional code
 
 
-!\[How it looks](https://i.ytimg.com/vi/ZBLEkoWgQPE/mqdefault.jpg)
-
-
 # 🏗 Green Port Control Tower — AI-Driven Port Sustainability Orchestration
 
 **PSA Code Sprint 2.0** | Deadline: Aug 30, 2026
