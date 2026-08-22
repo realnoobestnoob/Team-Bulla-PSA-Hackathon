@@ -1,7 +1,15 @@
-- Decision making use ai agents
-- 
+# Updates!
+- Generated barely working skeletal model
 
-**To do: edit project to use google ai studio (free) instead of anthropic api (not free) but run into some issues!!! Bug appears after using google api**
+# To-do!!!
+- Improve overall model complexity
+- Improve UI of output in terminal/deploy on streamlit
+- Optimize token usage
+- Generate means to evaluate model performance (KPI/metrics/some sort of score). Can use jupyter notebook to make some charts for the presentation
+
+# Notes
+- Using gemini 3.6 flash via google ai studio
+- Use AI agents for decision making; the rest use conventional code
 
 # 🏗️ Green Port Control Tower
 **PSA Code Sprint 2.0** — Agentic AI for Port Sustainability
@@ -98,9 +106,8 @@ green_port_agent/
 
 ## Changing the scenario
 
-<<<<<<< HEAD
 Edit any file in `data/` to change the environment. Scenario overrides in `data/scenarios/heavy_rain.json` are applied on top of the base data at load time — the source files are never modified.
-=======
+
 | Field | What it controls |
 |-------|-----------------|
 | `weather` | `"clear"` / `"light_rain"` / `"heavy_rain"` / `"storm"` |
@@ -120,4 +127,3 @@ Edit any file in `data/` to change the environment. Scenario overrides in `data/
 | LangGraph | Stateful multi-agent orchestration with conditional routing |
 | Python | Tool functions, mock data, CLI output |
 | Rich | Formatted terminal output |
->>>>>>> 57a360f19d095da19fa834088ca6b411634c7132
