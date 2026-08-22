@@ -1,23 +1,25 @@
 # Updates!
-- ~~Generated barely working skeletal model~~
-- Generated dashboard
-- Now using thinking high mode for models
 
-![How it looks](https://i.ibb.co/pj3dqc7r/dashboard1.png)
+* Now using thinking high mode for models
 
 # To-do!!!
-- Improve overall model complexity
-- ~~Improve UI of output in terminal/deploy on streamlit~~
-- Improve dashboard
-  - Tutorial on how to use/ make UI more intuitive
-  - Way to accept some jobs and reject some jobs and replan after that
-- Optimize token usage
-  - ~~Dedicate larger portion of tokens to thinking~~
-- Generate means to evaluate model performance (KPI/metrics/some sort of score). 
+
+* Improve overall model complexity
+* Improve dashboard
+
+  * Tutorial on how to use/ make UI more intuitive
+  * Way to accept some jobs and reject some jobs and replan after that
+* **Optimize token usage**
+* Generate means to evaluate model performance (KPI/metrics/some sort of score)
 
 # Notes
-- Using models via google ai studio using api key 
-- Use AI agents for decision making; the rest use conventional code
+
+* Using models via google ai studio using api key
+* Use AI agents for decision making; the rest use conventional code
+
+
+!\[How it looks](https://i.ytimg.com/vi/ZBLEkoWgQPE/mqdefault.jpg)
+
 
 # 🏗 Green Port Control Tower — AI-Driven Port Sustainability Orchestration
 
@@ -25,18 +27,19 @@
 
 An agentic AI system that orchestrates port operations across sustainability objectives (emissions, energy, grid safety) using deterministic validation, human-in-the-loop approval, and real-time performance scoring.
 
----
+\---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Python 3.10+
-- Google AI Studio API key (free tier available at [ai.google.dev](https://ai.google.dev/gemini-api/docs/api-key))
 
-### Step 1: Clone & Install
+* Python 3.10+
+* Google AI Studio API key (free tier available at [ai.google.dev](https://ai.google.dev/gemini-api/docs/api-key))
+
+### Step 1: Clone \& Install
 
 ```bash
-cd green_port_agent
+cd green\_port\_agent
 pip install -r requirements.txt
 ```
 
@@ -47,22 +50,23 @@ Copy `.env.example` to `.env` and add your Google API key:
 ```bash
 cp .env.example .env
 # Edit .env and add:
-# GOOGLE_API_KEY=your-key-here
+# GOOGLE\_API\_KEY=your-key-here
 ```
 
 ### Step 3a: Run CLI Demo (Non-Interactive)
 
 ```bash
-python run_demo.py heavy_rain
+python run\_demo.py heavy\_rain
 ```
 
 Or with normal scenario:
 
 ```bash
-python run_demo.py normal
+python run\_demo.py normal
 ```
 
 The demo will:
+
 1. Load the port state
 2. Run the AI planner (with live tool-call output)
 3. Validate proposed actions
@@ -78,13 +82,14 @@ streamlit run dashboard.py
 ```
 
 Then:
+
 1. **Sidebar**: Select scenario + AI model
 2. **Click** "▶ Run Agent"
 3. **Review** the plan in Tab 2 (Port Status, Actions, Impact)
-4. **Click** "✅ Approve & Execute" or "↺ Request Replan"
+4. **Click** "✅ Approve \& Execute" or "↺ Request Replan"
 5. **View** performance score in Tab 3
 
----
+\---
 
 ## 📊 Architecture
 
@@ -92,9 +97,9 @@ Then:
 User Input (CLI or Streamlit)
          ↓
     Planner (AI Agent)
-    ├─ scan_job_fleet    ← batch tool: all jobs → vehicle match + route + weather
-    ├─ check_energy_impact
-    └─ [other tools]
+    ├─ scan\_job\_fleet    ← batch tool: all jobs → vehicle match + route + weather
+    ├─ check\_energy\_impact
+    └─ \[other tools]
          ↓
     Validator (deterministic)
     └─ catch double-assignment, low battery, unavailable vehicle
@@ -108,49 +113,56 @@ User Input (CLI or Streamlit)
     └─ Quit → exit
          ↓
     Executor (state mutations)
-    └─ only mutates port_state AFTER approval
+    └─ only mutates port\_state AFTER approval
          ↓
     Performance Scorer (new)
     └─ 0–100 score: Emissions (40) + Coverage (30) + Grid (20) + Quality (10) − Replans (5 each)
 ```
 
----
+\---
 
 ## 📁 File Guide
 
 ### Core Workflow
-- **`graph.py`** — LangGraph orchestration; 7 nodes: planner → validator → impact → approval → executor → metrics → end
-- **`state.py`** — WorkflowState TypedDict; tracks proposed/validated/executed actions, baseline/projected metrics, audit log
-- **`run_demo.py`** — CLI entry point; streams graph, prompts supervisor, prints final summary
 
-### AI & Tools
-- **`agents/base.py`** — Google AI client wrapper; `run_agent()`, `set_model()`, `get_last_token_usage()`
-- **`agents/control_tower.py`** — single planner agent; compressed port state (86% token reduction), batch `scan_job_fleet` tool
-- **`tools/*.py`** — pure Python tools (route, emissions, energy, weather); no external API calls
+* **`graph.py`** — LangGraph orchestration; 7 nodes: planner → validator → impact → approval → executor → metrics → end
+* **`state.py`** — WorkflowState TypedDict; tracks proposed/validated/executed actions, baseline/projected metrics, audit log
+* **`run\_demo.py`** — CLI entry point; streams graph, prompts supervisor, prints final summary
 
-### Validation & Execution
-- **`validator.py`** — constraint checker; battery/fuel reserves, double-assignment prevention, high-priority job enforcement
-- **`executor.py`** — applies approved actions to port_state copy; returns new state, executed list, audit trail
-- **`approval.py`** — CLI supervisor loop; shows action table, impact metrics, yes/no/replan buttons
+### AI \& Tools
+
+* **`agents/base.py`** — Google AI client wrapper; `run\_agent()`, `set\_model()`, `get\_last\_token\_usage()`
+* **`agents/control\_tower.py`** — single planner agent; compressed port state (86% token reduction), batch `scan\_job\_fleet` tool
+* **`tools/\*.py`** — pure Python tools (route, emissions, energy, weather); no external API calls
+
+### Validation \& Execution
+
+* **`validator.py`** — constraint checker; battery/fuel reserves, double-assignment prevention, high-priority job enforcement
+* **`executor.py`** — applies approved actions to port\_state copy; returns new state, executed list, audit trail
+* **`approval.py`** — CLI supervisor loop; shows action table, impact metrics, yes/no/replan buttons
 
 ### Evaluation
-- **`metrics.py`** (new) — scores each run 0–100 across 4 weighted categories; letter grade A+–F; token efficiency label
-- **`impact.py`** — computes baseline (all-diesel) and projected metrics (after proposed actions)
-- **`loader.py`** — loads separate JSON source files, merges into runtime PortState, applies scenario overrides
+
+* **`metrics.py`** (new) — scores each run 0–100 across 4 weighted categories; letter grade A+–F; token efficiency label
+* **`impact.py`** — computes baseline (all-diesel) and projected metrics (after proposed actions)
+* **`loader.py`** — loads separate JSON source files, merges into runtime PortState, applies scenario overrides
 
 ### Dashboard
-- **`dashboard.py`** (new) — Streamlit 3-tab interface: Port Status | Plan & Approve | Performance
+
+* **`dashboard.py`** (new) — Streamlit 3-tab interface: Port Status | Plan \& Approve | Performance
 
 ### Data
-- **`data/`** — JSON source files (vehicles, jobs, weather, equipment, energy, objectives, scenarios)
 
----
+* **`data/`** — JSON source files (vehicles, jobs, weather, equipment, energy, objectives, scenarios)
+
+\---
 
 ## 🎮 Usage Examples
 
 ### Example 1: CLI Demo (Approve)
+
 ```bash
-$ python run_demo.py heavy_rain
+$ python run\_demo.py heavy\_rain
 
 🏗  GREEN PORT CONTROL TOWER
 PSA Code Sprint 2.0  |  Scenario: Heavy Rain
@@ -162,8 +174,8 @@ PSA Code Sprint 2.0  |  Scenario: Heavy Rain
   Grid load    2400/3000 kW  (80%)
 
 🧠 CONTROL TOWER AI — Planning
-  → scan_job_fleet(['J01', 'J02', ...])
-  → check_energy_impact(3)
+  → scan\_job\_fleet(\['J01', 'J02', ...])
+  → check\_energy\_impact(3)
   ✓ 4 action(s) proposed
 
 ✅ CONSTRAINT VALIDATOR
@@ -173,7 +185,7 @@ PSA Code Sprint 2.0  |  Scenario: Heavy Rain
   CO₂ saved: 18.4 kg  |  Grid: 2580 kW (safe)
 
 👤 HUMAN SUPERVISOR
-  Decision [approve/replan/quit]: approve
+  Decision \[approve/replan/quit]: approve
   ✓ Plan approved. Executing...
 
 ⚙  ACTION EXECUTOR
@@ -203,12 +215,13 @@ PSA Code Sprint 2.0  |  Scenario: Heavy Rain
 ```
 
 ### Example 2: Dashboard (Replan)
+
 ```bash
 $ streamlit run dashboard.py
 
 # In browser @ http://localhost:8501
 
-# 1. Sidebar: Select "heavy_rain" scenario, keep default "gemini-2.0-flash" model
+# 1. Sidebar: Select "heavy\_rain" scenario, keep default "gemini-2.0-flash" model
 # 2. Click ▶ Run Agent
 # 3. Wait for AI planning (see tool calls in Tab 2)
 # 4. Review actions in Tab 2 "Proposed Actions" table
@@ -217,7 +230,7 @@ $ streamlit run dashboard.py
 # 7. Type in reason: "prioritise J01, avoid V02"
 # 8. Click Submit Replan
 # 9. Wait for new plan
-# 10. Click ✅ Approve & Execute
+# 10. Click ✅ Approve \& Execute
 # 11. View score breakdown in Tab 3
 #     - Emissions Saved: 40/40 points
 #     - Job Coverage: 21.4/30 points
@@ -227,177 +240,195 @@ $ streamlit run dashboard.py
 #     Total: 86.4/100 → Grade A
 ```
 
----
+\---
 
 ## 🧠 How It Works
 
-### 1. **Planning** (AI Agent)
-- Receives compressed port state (vehicles, jobs, weather, energy, constraints)
-- Calls `scan_job_fleet` **once** to evaluate all jobs at once (vehicle match + route + CO₂ + weather risk)
-- Calls `check_energy_impact` if ≥3 EVs are dispatched
-- Proposes list of actions: dispatch, delay_job, or recharge
-- Returns JSON array with reason, risk, estimated impact, requires_approval flag
+### 1\. **Planning** (AI Agent)
+
+* Receives compressed port state (vehicles, jobs, weather, energy, constraints)
+* Calls `scan\_job\_fleet` **once** to evaluate all jobs at once (vehicle match + route + CO₂ + weather risk)
+* Calls `check\_energy\_impact` if ≥3 EVs are dispatched
+* Proposes list of actions: dispatch, delay\_job, or recharge
+* Returns JSON array with reason, risk, estimated impact, requires\_approval flag
 
 **Token Optimization**:
-- Port state compressed to **522 chars** instead of 3,839 (86% reduction)
-- Batch tool reduces tool calls from ~40 to ~5–8 per run
 
-### 2. **Validation** (Deterministic Code)
-- Check battery/fuel above reserve thresholds
-- Prevent double-assignment (same vehicle or job in one plan)
-- High-priority jobs cannot be delayed without supervisor override
-- Returns annotated action list with valid/invalid flags + reasons
+* Port state compressed to **522 chars** instead of 3,839 (86% reduction)
+* Batch tool reduces tool calls from \~40 to \~5–8 per run
 
-### 3. **Impact Evaluation**
-- **Baseline**: CO₂ if all unassigned HIGH+MEDIUM jobs done by diesel
-- **Projected**: CO₂ emitted by plan, CO₂ saved, grid headroom, delayed jobs
-- Compares actual vs baseline to show sustainability gain
+### 2\. **Validation** (Deterministic Code)
 
-### 4. **Human Approval** (CLI or Streamlit)
-- Supervisor sees action table + impact metrics
-- Choices:
-  - ✅ **Approve**: execute immediately
-  - ↺ **Replan**: give AI a constraint (e.g. "prioritise J01"), go back to step 1 (max 2 times)
-  - ❌ **Quit**: exit demo
+* Check battery/fuel above reserve thresholds
+* Prevent double-assignment (same vehicle or job in one plan)
+* High-priority jobs cannot be delayed without supervisor override
+* Returns annotated action list with valid/invalid flags + reasons
 
-### 5. **Execution** (Pure State Mutations)
-- Only happens **after** approval
-- Mutates a copy of port_state (immutable source stays unchanged)
-- Updates vehicle status, job assignments, charging state
-- Returns executed action list + audit trail
+### 3\. **Impact Evaluation**
 
-### 6. **Performance Scoring** (new)
-- **Emissions Saved** (40 pts): CO₂ saved ÷ baseline CO₂
-- **Job Coverage** (30 pts): jobs dispatched ÷ total actionable
-- **Grid Safety** (20 pts): headroom ratio (0 if overloaded)
-- **Plan Quality** (10 pts): valid actions ÷ total proposed
-- **Replan Penalty** (−5 pts/replan): supervisor restarts
-- **Total**: 0–100 → Letter grade (A+ / A / B / C / D / F)
-- **Token Efficiency**: Excellent (<2K) / Good (<5K) / Fair (<10K) / High (≥10K)
+* **Baseline**: CO₂ if all unassigned HIGH+MEDIUM jobs done by diesel
+* **Projected**: CO₂ emitted by plan, CO₂ saved, grid headroom, delayed jobs
+* Compares actual vs baseline to show sustainability gain
 
----
+### 4\. **Human Approval** (CLI or Streamlit)
+
+* Supervisor sees action table + impact metrics
+* Choices:
+
+  * ✅ **Approve**: execute immediately
+  * ↺ **Replan**: give AI a constraint (e.g. "prioritise J01"), go back to step 1 (max 2 times)
+  * ❌ **Quit**: exit demo
+
+### 5\. **Execution** (Pure State Mutations)
+
+* Only happens **after** approval
+* Mutates a copy of port\_state (immutable source stays unchanged)
+* Updates vehicle status, job assignments, charging state
+* Returns executed action list + audit trail
+
+### 6\. **Performance Scoring** (new)
+
+* **Emissions Saved** (40 pts): CO₂ saved ÷ baseline CO₂
+* **Job Coverage** (30 pts): jobs dispatched ÷ total actionable
+* **Grid Safety** (20 pts): headroom ratio (0 if overloaded)
+* **Plan Quality** (10 pts): valid actions ÷ total proposed
+* **Replan Penalty** (−5 pts/replan): supervisor restarts
+* **Total**: 0–100 → Letter grade (A+ / A / B / C / D / F)
+* **Token Efficiency**: Excellent (<2K) / Good (<5K) / Fair (<10K) / High (≥10K)
+
+\---
 
 ## 🎯 Performance Scoring Explained
 
 Your run's score breaks down into 4 independent dimensions:
 
-| Dimension | Max Points | How It Works |
-|---|---|---|
-| **Emissions Saved** | 40 | `(CO₂ saved / baseline CO₂) × 40` — max 40 if you beat all-diesel baseline |
-| **Job Coverage** | 30 | `(jobs dispatched / total actionable jobs) × 30` — max 30 if you cover all jobs |
-| **Grid Safety** | 20 | `(grid headroom / capacity) × 20` — zero if you overload the grid |
-| **Plan Quality** | 10 | `(valid actions / proposed actions) × 10` — max 10 if AI's plan is 100% feasible |
-| **Replan Penalty** | −5 each | Deducted once per supervisor replan (encourage first-try planning) |
+|Dimension|Max Points|How It Works|
+|-|-|-|
+|**Emissions Saved**|40|`(CO₂ saved / baseline CO₂) × 40` — max 40 if you beat all-diesel baseline|
+|**Job Coverage**|30|`(jobs dispatched / total actionable jobs) × 30` — max 30 if you cover all jobs|
+|**Grid Safety**|20|`(grid headroom / capacity) × 20` — zero if you overload the grid|
+|**Plan Quality**|10|`(valid actions / proposed actions) × 10` — max 10 if AI's plan is 100% feasible|
+|**Replan Penalty**|−5 each|Deducted once per supervisor replan (encourage first-try planning)|
 
 **Grade Mapping**:
-- **A+**: 90–100
-- **A**: 80–89
-- **B**: 70–79
-- **C**: 60–69
-- **D**: 50–59
-- **F**: <50
+
+* **A+**: 90–100
+* **A**: 80–89
+* **B**: 70–79
+* **C**: 60–69
+* **D**: 50–59
+* **F**: <50
 
 **Example**: You achieve:
-- 18.4 kg CO₂ saved vs 25.6 kg baseline → (18.4/25.6) × 40 = **28.6 pts**
-- 4 jobs dispatched vs 8 actionable → (4/8) × 30 = **15 pts**
-- 420 kW headroom vs 3000 kW capacity → (420/3000) × 20 = **2.8 pts**
-- All 4 actions valid → (4/4) × 10 = **10 pts**
-- No replans → **0 penalty**
-- **Total**: 28.6 + 15 + 2.8 + 10 = **56.4** → Grade **D**
 
----
+* 18.4 kg CO₂ saved vs 25.6 kg baseline → (18.4/25.6) × 40 = **28.6 pts**
+* 4 jobs dispatched vs 8 actionable → (4/8) × 30 = **15 pts**
+* 420 kW headroom vs 3000 kW capacity → (420/3000) × 20 = **2.8 pts**
+* All 4 actions valid → (4/4) × 10 = **10 pts**
+* No replans → **0 penalty**
+* **Total**: 28.6 + 15 + 2.8 + 10 = **56.4** → Grade **D**
+
+\---
 
 ## 📈 Dashboard Tabs
 
 ### Tab 1: Port Status 📊
-- **KPI strip**: Fleet composition, grid load %, high-priority jobs
-- **Fleet status pie chart**: idle / dispatched / charging / breakdown
-- **Fleet table**: vehicle ID, type, location, battery/fuel, status
-- **Jobs table**: job ID, priority, origin→destination, deadline, status
-- **Weather gauge**: condition, wind speed, rain probability
-- **Grid gauge**: current load vs capacity (green=safe, red=at risk)
 
-### Tab 2: Plan & Approve 📋
-- **Agent tool-call log**: expandable list of tool calls and arguments
-- **Proposed actions table**: type, vehicle, job, risk level, reason, validation status
-- **CO₂ comparison bar chart**: baseline vs proposed vs saved
-- **Grid projection gauge**: projected grid load after actions (safe/overload)
-- **Impact metrics**: jobs covered, CO₂ saved, grid status, delayed jobs
-- **Sidebar buttons**:
-  - ✅ Approve & Execute
-  - ↺ Request Replan (with text input for constraint)
-  - ❌ Cancel
+* **KPI strip**: Fleet composition, grid load %, high-priority jobs
+* **Fleet status pie chart**: idle / dispatched / charging / breakdown
+* **Fleet table**: vehicle ID, type, location, battery/fuel, status
+* **Jobs table**: job ID, priority, origin→destination, deadline, status
+* **Weather gauge**: condition, wind speed, rain probability
+* **Grid gauge**: current load vs capacity (green=safe, red=at risk)
+
+### Tab 2: Plan \& Approve 📋
+
+* **Agent tool-call log**: expandable list of tool calls and arguments
+* **Proposed actions table**: type, vehicle, job, risk level, reason, validation status
+* **CO₂ comparison bar chart**: baseline vs proposed vs saved
+* **Grid projection gauge**: projected grid load after actions (safe/overload)
+* **Impact metrics**: jobs covered, CO₂ saved, grid status, delayed jobs
+* **Sidebar buttons**:
+
+  * ✅ Approve \& Execute
+  * ↺ Request Replan (with text input for constraint)
+  * ❌ Cancel
 
 ### Tab 3: Performance 🎯
-- **Score gauge**: 0–100 with letter grade, color-coded (green A+ → red F)
-- **Breakdown bar chart**: Emissions (40) / Coverage (30) / Grid (20) / Quality (10) / Penalty (−5)
-- **Token counters**: prompt tokens, completion tokens, total, efficiency label
-- **Sustainability card**: CO₂ saved, baseline CO₂, jobs dispatched, grid safe
-- **Operational card**: valid actions, total proposed, replans needed
 
----
+* **Score gauge**: 0–100 with letter grade, color-coded (green A+ → red F)
+* **Breakdown bar chart**: Emissions (40) / Coverage (30) / Grid (20) / Quality (10) / Penalty (−5)
+* **Token counters**: prompt tokens, completion tokens, total, efficiency label
+* **Sustainability card**: CO₂ saved, baseline CO₂, jobs dispatched, grid safe
+* **Operational card**: valid actions, total proposed, replans needed
+
+\---
 
 ## 🔧 Configuration
 
 ### Model Selection (Streamlit)
+
 Sidebar dropdown lets you pick from:
--  `gemini-3.1-flash-lite`
--  `gemini-3.5-flash-lite`
--  `gemini-3.5-flash`
--  `gemini-3.6-flash`      
--  `gemini-3.7-flash`
+
+* `gemini-3.1-flash-lite`
+* `gemini-3.5-flash-lite`
+* `gemini-3.5-flash`
+* `gemini-3.6-flash`
+* `gemini-3.7-flash`
 
 ### Scenario Selection
-- **Heavy Rain** 🌧: Heavy rainfall, reduced visibility, 2 vehicles offline
-- **Normal** ☀️: Clear skies, all fleet available
+
+* **Heavy Rain** 🌧: Heavy rainfall, reduced visibility, 2 vehicles offline
+* **Normal** ☀️: Clear skies, all fleet available
 
 ### System Constraints (in `data/objectives.json`)
-- `prefer_electric`: true (encourage EV dispatch)
-- `min_battery_reserve_pct`: 20% (can't drop below)
-- `min_fuel_reserve_pct`: 15% (can't drop below)
-- `grid_limit_kw`: 3000 (absolute max grid load)
-- `max_acceptable_delay_mins`: 30 (jobs delayed > 30 mins lose points)
 
----
+* `prefer\_electric`: true (encourage EV dispatch)
+* `min\_battery\_reserve\_pct`: 20% (can't drop below)
+* `min\_fuel\_reserve\_pct`: 15% (can't drop below)
+* `grid\_limit\_kw`: 3000 (absolute max grid load)
+* `max\_acceptable\_delay\_mins`: 30 (jobs delayed > 30 mins lose points)
+
+\---
 
 ## 🐛 Troubleshooting
 
-| Issue | Solution |
-|---|---|
-| `ImportError: cannot import name 'genai'` | Run `pip install google-genai --break-system-packages` |
-| `ModuleNotFoundError: No module named 'streamlit'` | Run `pip install -r requirements.txt` |
-| `GOOGLE_API_KEY not set` | Check `.env` file exists and has your API key |
-| Dashboard won't start | Try `streamlit run dashboard.py --logger.level=debug` |
-| Agent repeats same plan on replan | Supervisor constraint not clear (e.g. "prioritise J01" vs "J01 only") |
+|Issue|Solution|
+|-|-|
+|`ImportError: cannot import name 'genai'`|Run `pip install google-genai --break-system-packages`|
+|`ModuleNotFoundError: No module named 'streamlit'`|Run `pip install -r requirements.txt`|
+|`GOOGLE\_API\_KEY not set`|Check `.env` file exists and has your API key|
+|Dashboard won't start|Try `streamlit run dashboard.py --logger.level=debug`|
+|Agent repeats same plan on replan|Supervisor constraint not clear (e.g. "prioritise J01" vs "J01 only")|
 
----
+\---
 
 ## 📝 Key Improvements in This Version
 
-✅ **Model Complexity** — Batch tool (scan_job_fleet) replaces 4–5 separate calls  
-✅ **Token Efficiency** — Compressed state (86% reduction), on_step callback for tool streaming  
+✅ **Model Complexity** — Batch tool (scan\_job\_fleet) replaces 4–5 separate calls  
+✅ **Token Efficiency** — Compressed state (86% reduction), on\_step callback for tool streaming  
 ✅ **Performance Metrics** — KPI score (0–100), letter grade, token efficiency label  
 ✅ **Dashboard** — Interactive 3-tab Streamlit interface with charts, gauges, live approval buttons  
-✅ **Evaluation** — Breakdown by category (emissions, coverage, grid, quality), weighted scoring  
+✅ **Evaluation** — Breakdown by category (emissions, coverage, grid, quality), weighted scoring
 
----
+\---
 
 ## 📚 Project Structure
 
 ```
-green_port_agent/
+green\_port\_agent/
 ├── README.md (this file)
 ├── requirements.txt
 ├── .env (your API key)
 │
-├── run_demo.py          # CLI entry point
+├── run\_demo.py          # CLI entry point
 ├── dashboard.py         # Streamlit entry point (NEW)
 ├── graph.py             # LangGraph orchestration (+ metrics node)
 ├── state.py             # WorkflowState TypedDict (+ metrics fields)
 │
 ├── agents/
 │   ├── base.py          # Google AI client (+ model switching, token tracking)
-│   └── control_tower.py # Single planner (+ batch tool, compressed state)
+│   └── control\_tower.py # Single planner (+ batch tool, compressed state)
 │
 ├── tools/
 │   ├── route.py         # Vehicle-job routing
@@ -419,35 +450,37 @@ green_port_agent/
 │   ├── energy.json
 │   ├── objectives.json
 │   ├── equipment.json
-│   ├── charging_stations.json
+│   ├── charging\_stations.json
 │   └── scenarios/
-│       ├── heavy_rain.json
+│       ├── heavy\_rain.json
 │       └── normal.json
 ```
 
----
+\---
 
 ## 🎓 Learning Path
 
-1. **Start**: Run `python run_demo.py heavy_rain`, approve the plan → see CLI output
+1. **Start**: Run `python run\_demo.py heavy\_rain`, approve the plan → see CLI output
 2. **Explore**: Run `streamlit run dashboard.py`, click through tabs → understand data flow
 3. **Customize**: Edit `data/scenarios/normal.json` to change vehicle/job counts, test replanning
-4. **Extend**: Add new tools in `tools/`, hook them in `agents/control_tower.py` TOOL_DEFS
-5. **Deploy**: Save run_metrics from each session to build a performance leaderboard
+4. **Extend**: Add new tools in `tools/`, hook them in `agents/control\_tower.py` TOOL\_DEFS
+5. **Deploy**: Save run\_metrics from each session to build a performance leaderboard
 
----
+\---
 
 ## 📞 Support
 
 For questions on the PSA Code Sprint 2.0:
-- 📍 **Architecture**: See `green_port_control_tower_architecture.md`
-- 🤖 **AI Model**: Check Google AI Studio docs at [ai.google.dev](https://ai.google.dev)
-- 🔗 **LangGraph**: See [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph)
 
----
+* 📍 **Architecture**: See `green\_port\_control\_tower\_architecture.md`
+* 🤖 **AI Model**: Check Google AI Studio docs at [ai.google.dev](https://ai.google.dev)
+* 🔗 **LangGraph**: See [langchain-ai/langgraph](https://github.com/langchain-ai/langgraph)
+
+\---
 
 **Last Updated**: August 22, 2026  
 **Submission Deadline**: August 30, 2026 (8 days remaining)  
 **Status**: ✅ Production-ready. All imports clean. Ready for live demo.
 EOF
-cat /home/claude/green_port_agent/README.md
+cat /home/claude/green\_port\_agent/README.md
+
