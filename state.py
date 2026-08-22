@@ -21,5 +21,9 @@ class WorkflowState(TypedDict):
     replan_reason: str
     human_decision: str       # "approved" | "replanning"
 
+    # Performance evaluation
+    run_metrics:  dict    # score, grade, breakdown from metrics.py
+    token_usage:  dict    # prompt / completion / total token counts
+
     # Audit
     audit_log: List[dict]

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-Green Port Control Tower — Demo Runner
+Green Port Control Tower — CLI Demo Runner
 Usage: python run_demo.py [scenario]
 Scenarios: heavy_rain (default) | normal
 """
-import sys, os, json
-from pathlib import Path
+import sys, os
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
@@ -21,7 +20,7 @@ from loader import load_port_state
 from graph import app
 from state import WorkflowState
 
-console = Console()
+console  = Console()
 SCENARIO = sys.argv[1] if len(sys.argv) > 1 else "heavy_rain"
 
 
@@ -35,7 +34,6 @@ def print_header(scenario: str):
 
 def print_port_state(port_state: dict):
     console.print("\n[bold]📋 PORT STATE[/bold]")
-
     vehicles = port_state["vehicles"]
     jobs     = port_state["jobs"]
     weather  = port_state["weather"]
@@ -49,30 +47,46 @@ def print_port_state(port_state: dict):
     tbl = Table(box=box.SIMPLE, show_header=False)
     tbl.add_column(style="dim", width=22)
     tbl.add_column()
-    tbl.add_row("Vehicles",    f"{len(vehicles)} total  ({electric} electric, {len(vehicles)-electric} diesel)  |  {idle} idle")
-    tbl.add_row("Jobs",        f"{len(jobs)} total  |  {high_j} HIGH priority")
-    tbl.add_row("Weather",     f"[red]{weather.get('condition','?').replace('_',' ').title()}[/red]  |  Wind: {weather.get('wind_speed','?')} km/h")
-    tbl.add_row("Grid load",   f"{energy['grid_load_kw']}/{energy['grid_capacity_kw']} kW  ({grid_pct}%)")
+    tbl.add_row("Vehicles",  f"{len(vehicles)} total  ({electric} electric, {len(vehicles)-electric} diesel)  |  {idle} idle")
+    tbl.add_row("Jobs",      f"{len(jobs)} total  |  {high_j} HIGH priority")
+    tbl.add_row("Weather",   f"[red]{weather.get('condition','?').replace('_',' ').title()}[/red]  |  Wind: {weather.get('wind_speed','?')} km/h")
+    tbl.add_row("Grid load", f"{energy['grid_load_kw']}/{energy['grid_capacity_kw']} kW  ({grid_pct}%)")
     console.print(tbl)
 
 
 def print_final_summary(final_state: dict):
     console.rule("[bold green]✅ FINAL SUMMARY[/bold green]")
 
-    executed = final_state.get("executed_actions", [])
+    executed  = final_state.get("executed_actions", [])
     projected = final_state.get("projected_metrics", {})
     baseline  = final_state.get("baseline_metrics", {})
+    metrics   = final_state.get("run_metrics", {})
+    tokens    = final_state.get("token_usage", {})
 
     tbl = Table(box=box.ROUNDED)
     tbl.add_column("Metric")
-    tbl.add_column("Baseline", justify="right")
-    tbl.add_column("Achieved", justify="right", style="green")
+    tbl.add_column("Baseline",  justify="right")
+    tbl.add_column("Achieved",  justify="right", style="green")
 
     tbl.add_row("Jobs covered",    str(baseline.get("jobs_covered","?")), str(len(executed)))
-    tbl.add_row("CO₂ emitted kg",  str(baseline.get("co2_kg","?")),      str(projected.get("co2_kg","?")))
-    tbl.add_row("CO₂ saved kg",    "—",                                   f"[green]{projected.get('co2_saved_kg','?')}[/green]")
-    tbl.add_row("Grid headroom kW","—",                                   str(projected.get("headroom_kw","?")))
+    tbl.add_row("CO₂ emitted kg",  str(baseline.get("co2_kg","?")),       str(projected.get("co2_kg","?")))
+    tbl.add_row("CO₂ saved kg",    "—",  f"[green]{projected.get('co2_saved_kg','?')}[/green]")
+    tbl.add_row("Grid headroom kW","—",  str(projected.get("headroom_kw","?")))
     console.print(tbl)
+
+    if metrics:
+        score = metrics.get("total_score","?")
+        grade = metrics.get("grade","?")
+        console.print(f"\n[bold]🎯 Performance Score:[/bold] [cyan]{score}/100[/cyan]  "
+                      f"Grade: [bold cyan]{grade}[/bold cyan]")
+        for cat, pts in metrics.get("breakdown", {}).items():
+            color = "green" if float(pts) >= 0 else "red"
+            console.print(f"   {cat:<20} [{color}]{pts:+.1f}[/{color}]")
+
+    if tokens:
+        console.print(f"\n[dim]Tokens: {tokens.get('total_tokens','?')} total "
+                      f"(prompt={tokens.get('prompt_tokens','?')} "
+                      f"completion={tokens.get('completion_tokens','?')})[/dim]")
 
     console.print(f"\n[bold]Audit log:[/bold] {len(final_state.get('audit_log',[]))} entries recorded")
 
@@ -94,6 +108,8 @@ def main():
         "replan_count":      0,
         "replan_reason":     "",
         "human_decision":    "",
+        "run_metrics":       {},
+        "token_usage":       {},
         "audit_log":         [],
     }
 

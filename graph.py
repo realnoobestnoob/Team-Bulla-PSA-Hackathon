@@ -5,6 +5,8 @@ from validator import validate_all
 from impact import compute_baseline, compute_projected
 from executor import execute_actions
 from approval import human_approval
+from agents.base import get_last_token_usage
+from metrics import compute_run_score
 from rich.console import Console
 from rich.rule import Rule
 
@@ -65,6 +67,25 @@ def executor_node(state: WorkflowState) -> WorkflowState:
             "audit_log": state["audit_log"] + [{"step":"executor","entries":audit_entries}]}
 
 
+def metrics_node(state: WorkflowState) -> WorkflowState:
+    console.rule("[bold white]🎯 PERFORMANCE SCORER[/bold white]")
+    token_usage = get_last_token_usage()
+    run_metrics = compute_run_score(
+        baseline          = state.get("baseline_metrics", {}),
+        projected         = state.get("projected_metrics", {}),
+        validated_actions = state.get("validated_actions", []),
+        executed_actions  = state.get("executed_actions", []),
+        replan_count      = state.get("replan_count", 0),
+        token_usage       = token_usage,
+    )
+    score = run_metrics["total_score"]
+    grade = run_metrics["grade"]
+    console.print(f"  Score: [bold cyan]{score}/100[/bold cyan]  Grade: [bold cyan]{grade}[/bold cyan]  "
+                  f"Tokens: [dim]{token_usage.get('total_tokens','?')}[/dim]")
+    return {**state, "run_metrics": run_metrics, "token_usage": token_usage,
+            "audit_log": state["audit_log"] + [{"step": "metrics", "score": score, "grade": grade}]}
+
+
 # ── Routing ──────────────────────────────────────────────────────────────────
 
 def route_after_approval(state: WorkflowState) -> str:
@@ -81,6 +102,7 @@ builder.add_node("validator", validator_node)
 builder.add_node("impact",    impact_node)
 builder.add_node("approval",  approval_node)
 builder.add_node("executor",  executor_node)
+builder.add_node("metrics",   metrics_node)
 
 builder.set_entry_point("planner")
 builder.add_edge("planner",   "validator")
@@ -88,6 +110,7 @@ builder.add_edge("validator", "impact")
 builder.add_edge("impact",    "approval")
 builder.add_conditional_edges("approval", route_after_approval,
                                {"planner": "planner", "executor": "executor"})
-builder.add_edge("executor", END)
+builder.add_edge("executor",  "metrics")
+builder.add_edge("metrics",   END)
 
 app = builder.compile()
