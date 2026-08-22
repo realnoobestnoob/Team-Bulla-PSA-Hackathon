@@ -341,11 +341,11 @@ Your run's score breaks down into 4 independent dimensions:
 
 ### Model Selection (Streamlit)
 Sidebar dropdown lets you pick from:
-- `gemini-2.0-flash` (default)
-- `gemini-2.0-flash-exp`
-- `gemini-1.5-flash`
-- `gemini-1.5-pro`
-- `gemini-3.6-flash`
+-  `gemini-3.1-flash-lite`
+-  `gemini-3.5-flash-lite`
+-  `gemini-3.5-flash`
+-  `gemini-3.6-flash`      
+-  `gemini-3.7-flash`
 
 ### Scenario Selection
 - **Heavy Rain** 🌧: Heavy rainfall, reduced visibility, 2 vehicles offline
