@@ -2,6 +2,8 @@
 - ~~Generated barely working skeletal model~~
 - Generated dashboard
 
+![How it looks](https://ibb.co/qYRp6KSF)
+
 # To-do!!!
 - Improve overall model complexity
 - ~~Improve UI of output in terminal/deploy on streamlit~~
