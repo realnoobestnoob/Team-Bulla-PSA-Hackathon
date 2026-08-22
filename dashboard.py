@@ -23,11 +23,12 @@ from metrics import compute_run_score
 
 # ── Constants ─────────────────────────────────────────────────────────────────
 MODELS = [
-    "gemini-2.0-flash",
-    "gemini-2.0-flash-exp",
-    "gemini-1.5-flash",
-    "gemini-1.5-pro",
+    "gemini-2.5-flash",
+    "gemini-3.1-flash-lite",
+    "gemini-3.5-flash-lite",
+    "gemini-3.5-flash",
     "gemini-3.6-flash",        # keep original default available
+    "gemini-3.7-flash",
 ]
 SCENARIOS = {
     "heavy_rain": "🌧 Heavy Rain + Equipment Shortage",
