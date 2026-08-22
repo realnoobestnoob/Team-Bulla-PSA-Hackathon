@@ -12,7 +12,7 @@
 - Generate means to evaluate model performance (KPI/metrics/some sort of score). 
 
 # Notes
-- Using gemini 3.6 flash via google ai studio (note: using gemini 2.0 and below results in error --> need to remove from options in web app)
+- Using models via google ai studio using api key 
 - Use AI agents for decision making; the rest use conventional code
 
 # 🏗 Green Port Control Tower — AI-Driven Port Sustainability Orchestration
